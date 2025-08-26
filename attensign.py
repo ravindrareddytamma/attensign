@@ -76,25 +76,26 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         success, message = await mark_attendance()
         if success:
             await query.edit_message_text(f"✅ {message}")
-            await shutdown_after()
+            await shutdown_after(context.application)
         else:
             await query.edit_message_text(f"⚠️ {message}")
             await context.bot.send_message(chat_id=CHAT_ID, text=f"⚠️ {message}")
-            await shutdown_after()
+            await shutdown_after(context.application)
 
     elif query.data == "skip_today":
         await query.edit_message_text("⏭ Skipped attendance for today.")
-        await shutdown_after()
+        await shutdown_after(context.application)
 
     elif query.data == "remind_later":
         await query.edit_message_text("⏰ Will remind you again in 1 hour.")
         context.job_queue.run_once(remind, when=3600)
 
-async def shutdown_after(delay=0):
+async def shutdown_after(app, delay=0):
     if delay:
         await asyncio.sleep(delay)
     print("✅ Done. Shutting down container.")
-    sys.exit(0)
+    await app.stop()
+    await app.shutdown()
 
 
 # === Main ===
