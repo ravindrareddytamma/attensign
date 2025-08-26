@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 import sys
 import asyncio
 from datetime import time
@@ -6,10 +8,10 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CallbackQueryHandler, ContextTypes
 from playwright.async_api import async_playwright
 
+load_dotenv()
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+CHAT_ID = int(os.getenv("CHAT_ID"))
 
-# === Telegram Config ===
-TELEGRAM_TOKEN = "8349476534:AAHUmRPrfxpSpi53ZSZG9xkF-PVJJkw-47w"
-CHAT_ID = 8436230349
 
 # === Attendance Marking Function ===
 async def mark_attendance():
@@ -103,8 +105,9 @@ def main():
     app.add_handler(CallbackQueryHandler(button_handler))
 
     # Schedule job: every day at 9:00 AM IST
-    ist = pytz.timezone("Asia/Kolkata")
-    app.job_queue.run_daily(remind, time=time(hour=9, minute=0, tzinfo=ist))
+    # ist = pytz.timezone("Asia/Kolkata")
+    # app.job_queue.run_daily(remind, time=time(hour=9, minute=0, tzinfo=ist))
+    app.job_queue.run_repeating(remind,interval=15,first=0)
 
     print("🤖 Bot running... Waiting for 9:00 AM reminders.")
     app.run_polling()
