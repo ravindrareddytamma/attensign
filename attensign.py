@@ -98,7 +98,7 @@ async def shutdown_after(delay=0):
 
 
 # === Main ===
-async def main():
+def main():
     app = Application.builder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CallbackQueryHandler(button_handler))
 
@@ -107,10 +107,10 @@ async def main():
 
     # Start polling so it can listen for your reply on Telegram
     print("🤖 Bot running... Waiting for your instruction...")
-    await app.run_polling()
+    app.run_polling()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
 
 
 
