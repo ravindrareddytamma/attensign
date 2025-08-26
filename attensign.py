@@ -2,8 +2,6 @@ import os
 from dotenv import load_dotenv
 import sys
 import asyncio
-from datetime import time
-import pytz
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CallbackQueryHandler, ContextTypes
 from playwright.async_api import async_playwright
@@ -18,7 +16,7 @@ async def mark_attendance():
     try:
         async with async_playwright() as p:
             browser = await p.chromium.launch(
-                headless=False,
+                headless=True,
                 args=["--disable-notifications", "--disable-geolocation"]
             )
             context = await browser.new_context(
@@ -100,20 +98,20 @@ async def shutdown_after(delay=0):
 
 
 # === Main ===
-def main():
+async def main():
     app = Application.builder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CallbackQueryHandler(button_handler))
 
-    # Schedule job: every day at 9:00 AM IST
-    # ist = pytz.timezone("Asia/Kolkata")
-    # app.job_queue.run_daily(remind, time=time(hour=9, minute=0, tzinfo=ist))
-    app.job_queue.run_repeating(remind,interval=15,first=0)
+    # When triggered by GitHub Actions cron, send the reminder immediately
+    app.job_queue.run_once(remind, when=0)
 
-    print("🤖 Bot running... Waiting for 9:00 AM reminders.")
-    app.run_polling()
+    # Start polling so it can listen for your reply on Telegram
+    print("🤖 Bot running... Waiting for your instruction...")
+    await app.run_polling()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
+
 
 
 
